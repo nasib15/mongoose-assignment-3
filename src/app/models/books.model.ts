@@ -51,4 +51,4 @@ const bookSchema = new Schema<IBook>(
   }
 );
 
-export const Book = model("Book", bookSchema);
+export const Book = model<IBook>("Book", bookSchema);

@@ -14,7 +14,24 @@ bookRoutes.post("/books", async (req: Request, res: Response) => {
 });
 
 bookRoutes.get("/books", async (req: Request, res: Response) => {
-  const books = await Book.find();
+  const {
+    filter,
+    sort = "asc",
+    sortBy = "createdAt",
+    limit = "10",
+  } = req.query;
+  const limitNumber = Number(limit);
+  let query: any = {};
+
+  if (filter) {
+    query.genre = filter;
+  }
+
+  const books = await Book.find(query)
+    .sort({
+      [sortBy as string]: sort === "asc" ? 1 : -1,
+    })
+    .limit(limitNumber);
 
   res.status(200).json({
     success: true,
@@ -38,7 +55,9 @@ bookRoutes.put("/books/:bookId", async (req: Request, res: Response) => {
   const updateBookData = req.body;
   const { bookId } = req.params;
 
-  const response = await Book.findByIdAndUpdate(bookId, updateBookData);
+  const response = await Book.findByIdAndUpdate(bookId, updateBookData, {
+    new: true,
+  });
 
   res.status(201).json({
     success: true,
@@ -50,9 +69,9 @@ bookRoutes.put("/books/:bookId", async (req: Request, res: Response) => {
 bookRoutes.delete("/books/:bookId", async (req: Request, res: Response) => {
   const { bookId } = req.params;
 
-  const response = await Book.findByIdAndDelete(bookId);
+  await Book.findByIdAndDelete(bookId);
 
-  res.status(204).json({
+  res.status(200).json({
     success: true,
     message: "Book deleted successfully",
     data: null,

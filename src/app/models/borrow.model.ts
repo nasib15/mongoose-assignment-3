@@ -1,7 +1,7 @@
-import { Schema } from "mongoose";
-import { IBorrow } from "../interfaces/borrow.interfaces";
+import { model, Schema } from "mongoose";
+import { BorrowModelType, IBorrow } from "../interfaces/borrow.interfaces";
 
-const borrowSchema = new Schema<IBorrow>(
+const borrowSchema = new Schema<IBorrow, BorrowModelType>(
   {
     book: {
       type: Schema.Types.ObjectId,
@@ -22,3 +22,16 @@ const borrowSchema = new Schema<IBorrow>(
     versionKey: false,
   }
 );
+
+borrowSchema.static(
+  "updateAvailable",
+  function updateAvailable(availableNumber) {
+    if (availableNumber === 0) {
+      return false;
+    }
+
+    return true;
+  }
+);
+
+export const Borrow = model<IBorrow, BorrowModelType>("Borrow", borrowSchema);

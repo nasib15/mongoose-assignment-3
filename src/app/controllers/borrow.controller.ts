@@ -12,8 +12,8 @@ const CreateBorrowZodSchema = z.object({
 });
 
 borrowRoutes.post("/borrow", async (req: Request, res: Response) => {
-  // get id of book
   try {
+    // get id of book
     const borrowData = await CreateBorrowZodSchema.parseAsync(req.body);
     const bookId = borrowData.book;
 
@@ -54,7 +54,7 @@ borrowRoutes.post("/borrow", async (req: Request, res: Response) => {
       message: "The requested quantity is bigger than the available copies",
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(400).json({
       success: false,
       message: "Failed to create borrow request",
       error: error,
@@ -63,31 +63,39 @@ borrowRoutes.post("/borrow", async (req: Request, res: Response) => {
 });
 
 borrowRoutes.get("/borrow", async (req: Request, res: Response) => {
-  const result = await Borrow.aggregate([
-    {
-      $group: { _id: "$book", totalQuantity: { $sum: "$quantity" } },
-    },
-    {
-      $lookup: {
-        from: "books",
-        localField: "_id",
-        foreignField: "_id",
-        as: "book",
+  try {
+    const result = await Borrow.aggregate([
+      {
+        $group: { _id: "$book", totalQuantity: { $sum: "$quantity" } },
       },
-    },
-    {
-      $project: { _id: 0, book: { title: 1, isbn: 1 }, totalQuantity: 1 },
-    },
-    {
-      $unwind: "$book",
-    },
-  ]);
+      {
+        $lookup: {
+          from: "books",
+          localField: "_id",
+          foreignField: "_id",
+          as: "book",
+        },
+      },
+      {
+        $project: { _id: 0, book: { title: 1, isbn: 1 }, totalQuantity: 1 },
+      },
+      {
+        $unwind: "$book",
+      },
+    ]);
 
-  res.json({
-    success: true,
-    message: "Borrowed books summary retrieved successfully",
-    data: result,
-  });
+    res.json({
+      success: true,
+      message: "Borrowed books summary retrieved successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: "Error retrieving borrow details",
+      error: error,
+    });
+  }
 });
 
 export default borrowRoutes;

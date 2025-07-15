@@ -1,16 +1,49 @@
 import express, { Request, Response } from "express";
+import * as z from "zod";
 import { Book } from "../models/books.model";
 
 const bookRoutes = express.Router();
 
+const CreateBookZodSchema = z.object({
+  title: z.string().min(3),
+  author: z.string().min(3),
+  genre: z
+    .enum([
+      "FICTION",
+      "NON_FICTION",
+      "SCIENCE",
+      "HISTORY",
+      "BIOGRAPHY",
+      "FANTASY",
+    ])
+    .default("FICTION"),
+  isbn: z.string().min(10),
+  description: z.string().min(10),
+  copies: z.number().min(1),
+  available: z.boolean().default(true),
+});
+
+const PatchBookZodSchema = z.object({
+  copies: z.number().min(1),
+});
+
 bookRoutes.post("/books", async (req: Request, res: Response) => {
-  const bookData = req.body;
-  const book = await Book.create(bookData);
-  res.status(201).json({
-    success: true,
-    message: "Book created successfully",
-    data: book,
-  });
+  try {
+    const bookData = await CreateBookZodSchema.parseAsync(req.body);
+
+    const book = await Book.create(bookData);
+    res.status(201).json({
+      success: true,
+      message: "Book created successfully",
+      data: book,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to create book",
+      error: error,
+    });
+  }
 });
 
 bookRoutes.get("/books", async (req: Request, res: Response) => {
@@ -52,18 +85,26 @@ bookRoutes.get("/books/:id", async (req: Request, res: Response) => {
 });
 
 bookRoutes.put("/books/:bookId", async (req: Request, res: Response) => {
-  const updateBookData = req.body;
-  const { bookId } = req.params;
+  try {
+    const updateBookData = await PatchBookZodSchema.parseAsync(req.body);
+    const { bookId } = req.params;
 
-  const response = await Book.findByIdAndUpdate(bookId, updateBookData, {
-    new: true,
-  });
+    const response = await Book.findByIdAndUpdate(bookId, updateBookData, {
+      new: true,
+    });
 
-  res.status(201).json({
-    success: true,
-    message: "Book updated successfully",
-    data: response,
-  });
+    res.status(201).json({
+      success: true,
+      message: "Book updated successfully",
+      data: response,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update the book details",
+      error: error,
+    });
+  }
 });
 
 bookRoutes.delete("/books/:bookId", async (req: Request, res: Response) => {

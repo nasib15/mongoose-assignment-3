@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from "express";
+import express, { Application, NextFunction, Request, Response } from "express";
 import bookRoutes from "./app/controllers/book.controller";
 import borrowRoutes from "./app/controllers/borrow.controller";
 
@@ -11,6 +11,14 @@ app.use("/api", borrowRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to Library Management API");
+});
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  res.status(500).json({
+    message: err.message || "Validation failed",
+    success: false,
+    error: err,
+  });
 });
 
 export default app;

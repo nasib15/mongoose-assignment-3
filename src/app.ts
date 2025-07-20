@@ -1,3 +1,4 @@
+import cors from "cors";
 import express, { Application, NextFunction, Request, Response } from "express";
 import bookRoutes from "./app/controllers/book.controller";
 import borrowRoutes from "./app/controllers/borrow.controller";
@@ -5,6 +6,7 @@ import borrowRoutes from "./app/controllers/borrow.controller";
 const app: Application = express();
 
 app.use(express.json());
+app.use(cors({ origin: "http://localhost:5173" }));
 
 app.use("/api", bookRoutes);
 app.use("/api", borrowRoutes);

@@ -64,6 +64,8 @@ bookRoutes.get("/books", async (req: Request, res: Response) => {
       query.genre = filter;
     }
 
+    const totalBooks = await Book.countDocuments(query);
+
     const books = await Book.find(query)
       .sort({
         [sortBy as string]: sort === "asc" ? 1 : -1,
@@ -76,8 +78,8 @@ bookRoutes.get("/books", async (req: Request, res: Response) => {
       message: "Books retrieved successfully",
       data: books,
       meta: {
-        totalPages: Math.ceil(books.length / limitNumber),
-        totalItems: books.length,
+        totalPages: Math.ceil(totalBooks / limitNumber),
+        totalItems: totalBooks,
         currentPage: pageNumber,
         totalItemsPerPage: limitNumber,
       },

@@ -75,6 +75,12 @@ bookRoutes.get("/books", async (req: Request, res: Response) => {
       success: true,
       message: "Books retrieved successfully",
       data: books,
+      meta: {
+        totalPages: Math.ceil(books.length / limitNumber),
+        totalItems: books.length,
+        currentPage: pageNumber,
+        totalItemsPerPage: limitNumber,
+      },
     });
   } catch (error) {
     res.status(400).json({

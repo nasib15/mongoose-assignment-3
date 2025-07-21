@@ -52,9 +52,12 @@ bookRoutes.get("/books", async (req: Request, res: Response) => {
       filter,
       sort = "asc",
       sortBy = "createdAt",
-      limit = "10",
+      limit = 10,
+      page = 1,
     } = req.query;
     const limitNumber = Number(limit);
+    const pageNumber = Number(page);
+    const skip = (pageNumber - 1) * limitNumber;
     let query: any = {};
 
     if (filter) {
@@ -65,7 +68,8 @@ bookRoutes.get("/books", async (req: Request, res: Response) => {
       .sort({
         [sortBy as string]: sort === "asc" ? 1 : -1,
       })
-      .limit(limitNumber);
+      .limit(limitNumber)
+      .skip(skip);
 
     res.status(200).json({
       success: true,

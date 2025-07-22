@@ -24,7 +24,22 @@ const CreateBookZodSchema = z.object({
 });
 
 const PatchBookZodSchema = z.object({
+  title: z.string().min(3),
+  author: z.string().min(3),
+  genre: z
+    .enum([
+      "FICTION",
+      "NON_FICTION",
+      "SCIENCE",
+      "HISTORY",
+      "BIOGRAPHY",
+      "FANTASY",
+    ])
+    .default("FICTION"),
+  isbn: z.string().min(10),
+  description: z.string().min(10),
   copies: z.number().min(1),
+  available: z.boolean().default(true),
 });
 
 bookRoutes.post("/books", async (req: Request, res: Response) => {

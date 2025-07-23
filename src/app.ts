@@ -6,7 +6,11 @@ import borrowRoutes from "./app/controllers/borrow.controller";
 const app: Application = express();
 
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://assignment-4-redux.vercel.app"],
+  })
+);
 
 app.use("/api", bookRoutes);
 app.use("/api", borrowRoutes);

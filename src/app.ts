@@ -1,9 +1,19 @@
 import cors from "cors";
 import express, { Application, NextFunction, Request, Response } from "express";
+import rateLimit from "express-rate-limit";
 import bookRoutes from "./app/controllers/book.controller";
 import borrowRoutes from "./app/controllers/borrow.controller";
 
 const app: Application = express();
+
+// Basic rate limiting for all routes (CodeQL js/missing-rate-limiting).
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
 
 app.use(express.json());
 app.use(
